@@ -1,7 +1,7 @@
-use deku_redo::{NewDekuRead, Test};
-use deku::DekuRead;
 use bitvec::prelude::Msb0;
 use bitvec::view::BitView;
+use deku::DekuRead;
+use deku_redo::{NewDekuRead, Test};
 
 fn main() {
     let bytes = [0x00, 0x03];

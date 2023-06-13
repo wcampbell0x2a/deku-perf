@@ -1,10 +1,9 @@
-use deku::prelude::*;
-use deku::ctx::{Endian, ByteSize, BitSize};
-use deku::error::NeedSize;
 use std::io::Read;
 
 use bitvec::prelude::*;
-
+use deku::ctx::{BitSize, ByteSize, Endian};
+use deku::error::NeedSize;
+use deku::prelude::*;
 
 // TODO: test BitSlice<usize, Msb0>
 
@@ -16,10 +15,7 @@ pub trait NewDekuRead<'a, Ctx = ()> {
     /// needed.
     ///
     /// Returns the remaining bits after parsing in addition to Self.
-    fn read_new(
-        input: &'a BitSlice<u8, Msb0>,
-        ctx: Ctx,
-    ) -> Result<(usize, Self), DekuError>
+    fn read_new(input: &'a BitSlice<u8, Msb0>, ctx: Ctx) -> Result<(usize, Self), DekuError>
     where
         Self: Sized;
 }
@@ -38,15 +34,10 @@ pub trait NewDekuContainerRead<'a>: NewDekuRead<'a, ()> {
 
 // specialize u8 for ByteSize
 impl NewDekuRead<'_, ()> for u8 {
-    fn read_new(
-        input: &BitSlice<u8, Msb0>,
-        _: (),
-    ) -> Result<(usize, Self), DekuError> {
+    fn read_new(input: &BitSlice<u8, Msb0>, _: ()) -> Result<(usize, Self), DekuError> {
         const MAX_TYPE_BITS: usize = BitSize::of::<u8>().0;
         if input.len() < MAX_TYPE_BITS {
-            return Err(DekuError::Incomplete(NeedSize::new(
-                MAX_TYPE_BITS,
-            )));
+            return Err(DekuError::Incomplete(NeedSize::new(MAX_TYPE_BITS)));
         }
 
         // PANIC: We already check that input.len() < bit_size above, so no panic will happen
