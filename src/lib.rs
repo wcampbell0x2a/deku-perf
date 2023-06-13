@@ -65,32 +65,34 @@ impl NewDekuRead<'_, ()> for Test {
     fn read_new(
         __deku_input_bits: &'_ ::deku::bitvec::BitSlice<u8, ::deku::bitvec::Msb0>,
         _: (),
-    ) -> Result<(usize, Self), ::deku::DekuError>
-    {
+    ) -> Result<(usize, Self), ::deku::DekuError> {
         use core::convert::TryFrom;
         let mut __deku_read = 0;
         let mut __deku_rest = __deku_input_bits;
+        let mut total_read = 0;
         let __deku_a = {
             //assert!(__deku_read < __deku_input_bits.len());
             let (__deku_read, __deku_value) =
                 <u8 as NewDekuRead<'_, _>>::read_new(&__deku_rest, ())?;
             let __deku_value: u8 = Result::<_, ::deku::DekuError>::Ok(__deku_value)?;
             __deku_rest = &__deku_rest[__deku_read..];
+            total_read += __deku_read;
             __deku_value
         };
         let __deku_b = {
             //assert!(__deku_read < __deku_input_bits.len());
-            let (__deku_read_new, __deku_value) =
+            let (__deku_read, __deku_value) =
                 <u8 as NewDekuRead<'_, _>>::read_new(&__deku_rest, ())?;
             let __deku_value: u8 = Result::<_, ::deku::DekuError>::Ok(__deku_value)?;
             __deku_rest = &__deku_rest[__deku_read..];
+            total_read += __deku_read;
             __deku_value
         };
         let __deku_value = Self {
             a: __deku_a,
             b: __deku_b,
         };
-        Ok((__deku_read, __deku_value))
+        Ok((total_read, __deku_value))
     }
 }
 
@@ -111,3 +113,15 @@ impl Test {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let bytes = [0x00, 0x03];
+        let b = bytes.view_bits::<Msb0>();
+        let (amt_read, test) = Test::read_new(b, ()).unwrap();
+        assert_eq!(amt_read, (u8::BITS * 2) as usize);
+    }
+}
